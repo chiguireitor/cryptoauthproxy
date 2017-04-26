@@ -21,6 +21,8 @@ const bitcoin = require('bitcoinjs-lib')
 const bitcoinMessage = require('bitcoinjs-message')
 const httpPort = process.env.HTTP_PORT || 80
 
+app.use(require('cors'))
+
 var challenges = {}
 
 var byAddress = {}
