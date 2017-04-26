@@ -1,0 +1,21 @@
+{
+  "name": "cryptoauthproxy",
+  "version": "0.0.1",
+  "description": "A proxy for crypto wallet message signed authentication",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chiguireitor/cryptoauthproxy.git"
+  },
+  "author": "Chiguireitor",
+  "license": "MIT",
+  "dependencies": {
+    "bitcoinjs-lib": "^3.0.2",
+    "bitcoinjs-message": "^1.0.1",
+    "express": "^4.15.2",
+    "express-ws": "^3.0.0"
+  }
+}
