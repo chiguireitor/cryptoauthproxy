@@ -17,11 +17,16 @@ const express = require('express')
 var app = express()
 
 const expressWs = require('express-ws')(app)
+const cors = require('express-cors')
 const bitcoin = require('bitcoinjs-lib')
 const bitcoinMessage = require('bitcoinjs-message')
 const httpPort = process.env.HTTP_PORT || 80
 
-app.use(require('cors'))
+app.use(cors({
+    allowedOrigins: [
+        '*'
+    ]
+}))
 
 var challenges = {}
 
@@ -34,9 +39,6 @@ function verifySignatureAndRespond(challenge, signature, address) {
 }
 
 app.get('/', function (req, res) {
-  /*
-  address=[address]&signature=[url encoded signature]&challenge=asd
-  */
   let ret = {}
   if (('address' in req.params) && ('signature' in req.params)) {
     if (req.params.address in byAddress) {
