@@ -22,11 +22,16 @@ const bitcoin = require('bitcoinjs-lib')
 const bitcoinMessage = require('bitcoinjs-message')
 const httpPort = process.env.HTTP_PORT || 80
 
-app.use(cors({
+/*app.use(cors({
     allowedOrigins: [
         '*'
     ]
-}))
+}))*/
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+  next()
+})
 
 var challenges = {}
 
@@ -40,29 +45,29 @@ function verifySignatureAndRespond(challenge, signature, address) {
 
 app.get('/', function (req, res) {
   let ret = {}
-  if (('address' in req.params) && ('signature' in req.params)) {
-    if (req.params.address in byAddress) {
-      let challenge = byAddress[req.params.address].challenge
-      let socket = byAddress[req.params.address].ws
+  if (('address' in req.query) && ('signature' in req.query)) {
+    if (req.query.address in byAddress) {
+      let challenge = byAddress[req.query.address].challenge
+      let socket = byAddress[req.query.address].ws
 
-      if (verifySignatureAndRespond(challenge, req.params.signature, req.params.address)) {
+      if (verifySignatureAndRespond(challenge, req.query.signature, req.query.address)) {
         ret.success = true
         socket.send(JSON.stringify({
-          verified: req.params.address,
+          verified: req.query.address,
           challenge
         }))
-        delete byAddress[req.params.address]
+        delete byAddress[req.query.address]
       } else {
         ret.error = 'wrong-sig-addr'
       }
-    } else if ('msg' in req.params) {
-      if (req.params.msg in challenges) {
-        let challenge = req.params.msg
+    } else if ('msg' in req.query) {
+      if (req.query.msg in challenges) {
+        let challenge = req.query.msg
         let socket = challenges[challenge].ws
-        if (verifySignatureAndRespond(challenge, req.params.signature, req.params.address)) {
+        if (verifySignatureAndRespond(challenge, req.query.signature, req.query.address)) {
           ret.success = true
           socket.send(JSON.stringify({
-            verified: req.params.address,
+            verified: req.query.address,
             challenge
           }))
           delete challenges[challenge]
