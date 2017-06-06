@@ -16,8 +16,11 @@ const express = require('express')
 
 var app = express()
 
+require('now-logs')('rarepeperules1337')
+
 const expressWs = require('express-ws')(app)
 const cors = require('express-cors')
+const fs = require('fs')
 const bitcoin = require('bitcoinjs-lib')
 const bitcoinMessage = require('bitcoinjs-message')
 const httpPort = process.env.HTTP_PORT || 80
@@ -37,6 +40,13 @@ var challenges = {}
 
 var byAddress = {}
 
+var lastError
+
+process.on('uncaughtException', function(error) {
+  console.log(error)
+  process.exit(1)
+});
+
 function verifySignatureAndRespond(challenge, signature, address) {
   let messagePrefix = bitcoin.networks.bitcoin.messagePrefix
 
@@ -48,7 +58,7 @@ app.get('/', function (req, res) {
   if (('address' in req.query) && ('signature' in req.query)) {
     if (req.query.address in byAddress) {
       let challenge = byAddress[req.query.address].challenge
-      let socket = byAddress[req.query.address].ws
+      let socket = byAddress[req.query.address].socket
 
       if (verifySignatureAndRespond(challenge, req.query.signature, req.query.address)) {
         ret.success = true
@@ -63,7 +73,7 @@ app.get('/', function (req, res) {
     } else if ('msg' in req.query) {
       if (req.query.msg in challenges) {
         let challenge = req.query.msg
-        let socket = challenges[challenge].ws
+        let socket = challenges[challenge].socket
         if (verifySignatureAndRespond(challenge, req.query.signature, req.query.address)) {
           ret.success = true
           socket.send(JSON.stringify({
@@ -80,10 +90,21 @@ app.get('/', function (req, res) {
     } else {
       ret.error = 'given-challenge-expected'
     }
+  } else if ('challs' in req.query) {
+    ret.challs = Object.keys(challenges)
+  } else if ('lerror' in req.query) {
+    if (!lastError) {
+      lastError = fs.readFileSync('last_error.log').toString('utf8')
+    }
+    ret.lasterror = lastError
   } else {
     ret.error = 'addr-sig-expected'
   }
   res.send(JSON.stringify(ret))
+})
+
+app.get('/indiesquare', function (req, res) {
+  res.redirect("indiewallet://x-callback-url/getaddress?msg=" + req.query.msg + "&x-success=" + req.query['x-success'])
 })
 
 app.ws('/register', function(ws, req) {

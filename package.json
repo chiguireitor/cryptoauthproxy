@@ -18,6 +18,7 @@
     "bitcoinjs-message": "^1.0.1",
     "express": "^4.15.2",
     "express-cors": "0.0.3",
-    "express-ws": "^3.0.0"
+    "express-ws": "^3.0.0",
+    "now-logs": "0.0.7"
   }
 }
